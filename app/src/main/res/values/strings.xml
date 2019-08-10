@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Baking Time</string>
+    <string name="food_item">Food item</string>
+    <string name="error_main">Could not load data.</string>
+    <string name="serving_size">Serving size:</string>
+    <string name="backdrop_text">backdrop</string>
+    <string name="recipe_ingredients_button">Recipe Ingredients</string>
+    <string name="next_step">Next step</string>
+</resources>
