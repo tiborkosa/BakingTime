@@ -27,18 +27,20 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+
 public class RecipeStepFragment extends Fragment {
 
     private Step step;
     private OnNextStepClickedListener mCallback;
     private SimpleExoPlayerView mPlayerView;
-    private SimpleExoPlayer mExoPlayer;
+    private static SimpleExoPlayer mExoPlayer;
+    private Long currentPosition;
+    private Boolean isPlayerReady;
     private TextView mDescription;
     private Button mNextStep;
 
     private final static String TAG = RecipeStepFragment.class.getSimpleName();
-    private final static String DESCRIPTION = "description";
-    private final static String MOVIE_URL = "movie_url";
+    private final static String STEP = "step";
     private final static String PLAYER_CURRENT_POS_KEY = "player_pos";
     private final static String PLAYER_IS_READY_KEY = "player_ready";
 
@@ -49,7 +51,33 @@ public class RecipeStepFragment extends Fragment {
         void onNextStepClickedListener(int stepId);
     }
 
+    // Required empty public constructor
     public RecipeStepFragment() {}
+
+    public static RecipeStepFragment newInstance(Step step){
+        RecipeStepFragment fragment = new RecipeStepFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(STEP, step);
+        //args.putLong(PLAYER_CURRENT_POS_KEY, Math.max(0, mExoPlayer.getCurrentPosition()));
+        //args.putBoolean(PLAYER_IS_READY_KEY, mExoPlayer.getPlayWhenReady());
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate RecipeStepFragment.");
+        if(getArguments() != null){
+            step = getArguments().getParcelable(STEP);
+            Log.d(TAG, step.toString());
+            //currentPosition = getArguments().getLong(PLAYER_CURRENT_POS_KEY);
+            //isPlayerReady = getArguments().getBoolean(PLAYER_IS_READY_KEY);
+        } else {
+            Log.d(TAG, "onCreate RecipeStepFragment. Argument is null");
+        }
+    }
 
     @Nullable
     @Override
@@ -76,51 +104,37 @@ public class RecipeStepFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnNextStepClickedListener) {
+            mCallback = (OnNextStepClickedListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnNextStepClickedListener");
+        }
+    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState == null){
-            if(step != null){
-                mDescription.setText(step.getDescription());
-                initializePlayer(step.getVideoURL(), this.getContext());
-                if(!isPortrait)
-                    mNextStep.setOnClickListener( (view) -> mCallback.onNextStepClickedListener(step.getId()) );
-            } else {
-                Log.d(TAG, "Step is not set!");
-            }
-        } else {
-            if(!isPortrait){
-                mNextStep.setOnClickListener( (view) -> mCallback.onNextStepClickedListener(step.getId()) );
-                if(savedInstanceState.containsKey(DESCRIPTION)){
-                    mDescription.setText(savedInstanceState.getString(DESCRIPTION));
-                }
-                initializePlayer(step.getVideoURL(), this.getContext());
-            }
-            resumePlaybackFromStateBundle(savedInstanceState);
+        if(savedInstanceState == null) {
+            Log.d(TAG, "onActivityCreated instance state is null");
+          //  return;
         }
+        if(!isPortrait){
+            mDescription.setText(step.getDescription());
+            mNextStep.setOnClickListener( (view) -> mCallback.onNextStepClickedListener(step.getId()) );
+        }
+        //resumePlaybackFromStateBundle(savedInstanceState);
+        initializePlayer(step.getVideoURL(), this.getContext());
     }
-
+/*
     private void resumePlaybackFromStateBundle(@Nullable Bundle inState) {
         Log.d(TAG, "Resuming player.");
         mExoPlayer.setPlayWhenReady(inState.getBoolean(PLAYER_IS_READY_KEY));
         mExoPlayer.seekTo(inState.getLong(PLAYER_CURRENT_POS_KEY));
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(DESCRIPTION, step.getDescription());
-        outState.putString(MOVIE_URL, step.getVideoURL());
-        if(mExoPlayer != null) {
-            outState.putLong(PLAYER_CURRENT_POS_KEY, Math.max(0, mExoPlayer.getCurrentPosition()));
-            outState.putBoolean(PLAYER_IS_READY_KEY, mExoPlayer.getPlayWhenReady());
-        }
-    }
-
-    public void setStep(Step step) {
-        this.step = step;
-    }
+    }*/
 
     private void initializePlayer(String urlString, Context context) {
         if( urlString == null || urlString.isEmpty()) return;
@@ -144,16 +158,17 @@ public class RecipeStepFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(mExoPlayer != null)
-            releasePlayer();
+        if(mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
     }
 
-    /**
-     * Release ExoPlayer.
-     */
-    private void releasePlayer() {
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
     }
+
 }

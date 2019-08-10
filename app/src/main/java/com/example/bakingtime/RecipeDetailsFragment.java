@@ -1,8 +1,8 @@
 package com.example.bakingtime;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,40 +12,64 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.bakingtime.adapters.MainAdapter;
 import com.example.bakingtime.adapters.RecipeAdapter;
 import com.example.bakingtime.models.Step;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeDetailsFragment extends Fragment {
 
     private static final String TAG = RecipeActivity.class.getSimpleName();
+    public static final String STEPS = "recipe_steps";
+    public static final String RECIPE_ID = "recipe_id";
 
     private RecyclerView rv;
     private RecipeAdapter adapter;
     private Button mIngButton;
-    private int id;
-    private RecipeAdapter.ListItemClickListener mClickListener;
-    private List<Step> steps;
+    private static int id;
+    private static List<Step> steps;
+    private OnIngredientClickedListener mCallback;
+    RecipeAdapter.ListItemClickListener mNextStepCallback;
 
-    OnIngredientClickedListener mCallback;
+    public RecipeDetailsFragment() {}
 
-    public interface OnIngredientClickedListener {
-        void onIngredientClickedListener(int cakeId);
+    public static RecipeDetailsFragment newInstance(List<Step> steps, int id) {
+        RecipeDetailsFragment fragment = new RecipeDetailsFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(STEPS, (ArrayList<? extends Parcelable>) steps);
+        args.putInt(RECIPE_ID, id);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            steps = getArguments().getParcelableArrayList(STEPS);
+            id = getArguments().getInt(RECIPE_ID);
+        }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        try{
+        if (context instanceof OnIngredientClickedListener) {
             mCallback = (OnIngredientClickedListener) context;
-        } catch (ClassCastException e){
-            throw new ClassCastException(context.toString() + " must implement OnIngredientClickedListener");
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnIngredientClickedListener");
+        }
+        if(context instanceof RecipeAdapter.ListItemClickListener) {
+            mNextStepCallback = (RecipeAdapter.ListItemClickListener) context;
+        }else {
+            throw new RuntimeException(context.toString()
+                    + " must implement RecipeAdapter.ListItemClickListener!");
         }
     }
-
-    public RecipeDetailsFragment() {}
 
     @Nullable
     @Override
@@ -56,25 +80,19 @@ public class RecipeDetailsFragment extends Fragment {
         mIngButton = rootView.findViewById(R.id.btn_ingredients);
         mIngButton.setOnClickListener( view -> mCallback.onIngredientClickedListener(id));
 
-        try{
-            adapter = new RecipeAdapter(steps, mClickListener);
-            rv.setAdapter(adapter);
-        } catch (NullPointerException e){
-            throw new ClassCastException(container.toString() + " must implement OnIngredientClickedListener");
-        }
+        adapter = new RecipeAdapter(steps, mNextStepCallback);
+        rv.setAdapter(adapter);
 
         return rootView;
     }
 
-    public void setSteps(List<Step> steps) {
-        this.steps = steps;
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setmClickListener(RecipeActivity mClickListener) {
-        this.mClickListener = mClickListener;
+    public interface OnIngredientClickedListener {
+        void onIngredientClickedListener(int cakeId);
     }
 }

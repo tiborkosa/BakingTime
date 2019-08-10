@@ -6,4 +6,7 @@
     <string name="backdrop_text">backdrop</string>
     <string name="recipe_ingredients_button">Recipe Ingredients</string>
     <string name="next_step">Next step</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

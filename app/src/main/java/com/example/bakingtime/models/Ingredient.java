@@ -3,11 +3,13 @@ package com.example.bakingtime.models;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "ingredients")
-public class Ingredient {
+public class Ingredient implements Parcelable {
 
     @PrimaryKey(autoGenerate = true)
     @SerializedName("p_id")
@@ -84,5 +86,26 @@ public class Ingredient {
                 ", measure='" + measure + '\'' +
                 ", ingredient='" + ingredient + '\'' +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Ignore
+    public void Ingredient(Parcel in){
+        this.id = in.readInt();
+        this.quantity = in.readDouble();
+        this.measure = in.readString();
+        this.ingredient = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.id);
+        dest.writeDouble(this.quantity);
+        dest.writeString(this.measure);
+        dest.writeString(this.ingredient);
     }
 }
