@@ -21,7 +21,7 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
         this.mIngredients = mIngredients;
 
         int size = 0;
-        if(mIngredients.size() > 0) size = mIngredients.size();
+        if(mIngredients != null && mIngredients.size() > 0) size = mIngredients.size();
         this.mNumberOfItems = size;
     }
 
@@ -59,9 +59,21 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
         }
 
         private void bind(Ingredient ingredient){
-            mIngName.setText(ingredient.getIngredient());
-            mIngQuantity.setText(String.valueOf(ingredient.getQuantity()));
+            mIngName.setText(capitalizeFirstLetter(ingredient.getIngredient()));
+            mIngQuantity.setText( removeZero(String.valueOf(ingredient.getQuantity())) );
             mIngMeasure.setText(ingredient.getMeasure());
         }
+    }
+
+    private static String removeZero(String d){
+        int len = d.length();
+        if(d.charAt(len -1) == '0'){
+            return d.substring(0, len -2);
+        }
+        return d;
+    }
+
+    private static String capitalizeFirstLetter(String s){
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 }

@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.example.bakingtime.adapters.MainAdapter;
 import com.example.bakingtime.adapters.RecipeAdapter;
 import com.example.bakingtime.models.Step;
 
@@ -28,7 +27,6 @@ public class RecipeDetailsFragment extends Fragment {
     private RecyclerView rv;
     private RecipeAdapter adapter;
     private Button mIngButton;
-    private static int id;
     private static List<Step> steps;
     private OnIngredientClickedListener mCallback;
     RecipeAdapter.ListItemClickListener mNextStepCallback;
@@ -50,7 +48,6 @@ public class RecipeDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             steps = getArguments().getParcelableArrayList(STEPS);
-            id = getArguments().getInt(RECIPE_ID);
         }
     }
 
@@ -78,7 +75,7 @@ public class RecipeDetailsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.recipe_details_fragment, container, false);
         rv = rootView.findViewById(R.id.rv_recipe);
         mIngButton = rootView.findViewById(R.id.btn_ingredients);
-        mIngButton.setOnClickListener( view -> mCallback.onIngredientClickedListener(id));
+        mIngButton.setOnClickListener( view -> mCallback.onIngredientClickedListener());
 
         adapter = new RecipeAdapter(steps, mNextStepCallback);
         rv.setAdapter(adapter);
@@ -93,6 +90,6 @@ public class RecipeDetailsFragment extends Fragment {
     }
 
     public interface OnIngredientClickedListener {
-        void onIngredientClickedListener(int cakeId);
+        void onIngredientClickedListener();
     }
 }

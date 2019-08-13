@@ -9,7 +9,7 @@
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/exo_player"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="400dp" />
 
     <ImageView
         android:id="@+id/iv_player_no_image"
@@ -26,12 +26,5 @@
         android:padding="16dp"
         android:textColor="@color/black"
         android:textSize="16sp"/>
-
-    <Button
-        android:id="@+id/btn_next_step"
-        android:text="@string/next_step"
-        android:layout_margin="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
 </LinearLayout>

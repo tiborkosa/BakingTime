@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp" >
 
     <TextView
         android:id="@+id/tv_ingredient_name"
@@ -12,6 +13,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -19,9 +22,8 @@
         android:id="@+id/tv_ingredient_quantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
+        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="@+id/tv_ingredient_name"
         app:layout_constraintTop_toBottomOf="@+id/tv_ingredient_name" />
 
@@ -31,7 +33,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:textColor="@color/black"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toEndOf="@+id/tv_ingredient_quantity"
         app:layout_constraintTop_toBottomOf="@+id/tv_ingredient_name" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_ingredient_measure" />
 </android.support.constraint.ConstraintLayout>

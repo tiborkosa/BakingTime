@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
         cakes = new ArrayList<>();
         mMainAdapter = new MainAdapter(cakes, MainActivity.this);
         mRecycleView.setAdapter(mMainAdapter);
-        mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, 1));
+        mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, getColumns()));
 
         Thread thread = new Thread(() -> {
             AppDatabase database = AppDatabase.getInstance();
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
                 runOnUiThread(() -> {
                     mMainAdapter = new MainAdapter(cakes, MainActivity.this);
                     mRecycleView.setAdapter(mMainAdapter);
-                    mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, 1));
+                    mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, getColumns()));
                 });
             } else {
                 Log.d(TAG, "Getting data from the web.");
@@ -73,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
         thread.start();
     }
 
+    private int getColumns(){
+        if(getResources().getBoolean(R.bool.isTablet)) return 2;
+        return 1;
+    }
     private void loadDataFromWebAndSaveItInDB() {
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -85,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
                     runOnUiThread(() -> {
                         mMainAdapter = new MainAdapter(cakes, MainActivity.this);
                         mRecycleView.setAdapter(mMainAdapter);
-                        mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, 1));
+                        mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, getColumns()));
                     });
                 }, error -> {
                     //textView.setText("That didn't work!");
@@ -146,6 +151,18 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
     public void onListItemClick(int clickedItemIndex) {
         Intent intent = new Intent(MainActivity.this, RecipeActivity.class);
         intent.putExtra("cakeId", String.valueOf(cakes.get(clickedItemIndex).getId()) );
+        intent.putExtra("rec_name", cakes.get(clickedItemIndex).getName());
         startActivity(intent);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        super.onCreateOptionsMenu(menu);
+
+        menu.findItem(R.id.menu_back_to_list).setVisible(false);
+        return true;
+    }
+
+    // will not implement onOptionMenuClicked because we are already "Home"
 }

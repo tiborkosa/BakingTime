@@ -9,8 +9,17 @@
         android:id="@+id/exo_player"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/iv_player_no_image"
+        android:layout_width="match_parent"
+        android:layout_marginTop="16dp"
+        android:layout_height="200dp"
+        android:src="@drawable/img_not_available"
+        android:contentDescription="@string/no_image"
+        android:visibility="gone"/>
     <Button
         android:id="@+id/btn_next_step"
+        android:visibility="gone"
         android:text="@string/next_step"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
