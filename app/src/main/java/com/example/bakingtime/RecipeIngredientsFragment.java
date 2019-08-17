@@ -17,12 +17,15 @@ import com.example.bakingtime.models.Ingredient;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class RecipeIngredientsFragment extends Fragment {
 
     public static final String CAKE_INGREDIENTS = "ingredients";
     private static final String TAG = RecipeIngredientsFragment.class.getSimpleName();
 
-    private RecyclerView rv;
+    @BindView(R.id.rv_ingredients) RecyclerView rv;
     private IngredientsAdapter adapter;
     private List<Ingredient> ingredients;
 
@@ -55,7 +58,7 @@ public class RecipeIngredientsFragment extends Fragment {
 
         Log.d(TAG, "onCreateView.");
         View rootView = inflater.inflate(R.layout.recipe_ingredient_fragment, container, false);
-        rv = rootView.findViewById(R.id.rv_ingredients);
+        ButterKnife.bind(this, rootView);
 
         adapter = new IngredientsAdapter(ingredients);
         rv.setAdapter(adapter);

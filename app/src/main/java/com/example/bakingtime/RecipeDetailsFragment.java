@@ -18,15 +18,18 @@ import com.example.bakingtime.models.Step;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class RecipeDetailsFragment extends Fragment {
 
     private static final String TAG = RecipeActivity.class.getSimpleName();
     public static final String STEPS = "recipe_steps";
     public static final String RECIPE_ID = "recipe_id";
 
-    private RecyclerView rv;
+    @BindView(R.id.rv_recipe) RecyclerView rv;
     private RecipeAdapter adapter;
-    private Button mIngButton;
+    @BindView(R.id.btn_ingredients) Button mIngButton;
     private static List<Step> steps;
     private OnIngredientClickedListener mCallback;
     RecipeAdapter.ListItemClickListener mNextStepCallback;
@@ -73,10 +76,9 @@ public class RecipeDetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.recipe_details_fragment, container, false);
-        rv = rootView.findViewById(R.id.rv_recipe);
-        mIngButton = rootView.findViewById(R.id.btn_ingredients);
-        mIngButton.setOnClickListener( view -> mCallback.onIngredientClickedListener());
+        ButterKnife.bind(this, rootView);
 
+        mIngButton.setOnClickListener( view -> mCallback.onIngredientClickedListener());
         adapter = new RecipeAdapter(steps, mNextStepCallback);
         rv.setAdapter(adapter);
 

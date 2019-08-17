@@ -13,8 +13,6 @@ import android.view.Menu;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.bakingtime.adapters.MainAdapter;
@@ -32,13 +30,16 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements MainAdapter.ListItemClickLister{
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
     private final static String URL ="https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
 
-    private RecyclerView mRecycleView;
+    @BindView(R.id.rv_main) RecyclerView mRecycleView;
     private MainAdapter mMainAdapter;
     private List<Cake> cakes;
 
@@ -46,8 +47,8 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        mRecycleView = findViewById(R.id.rv_main);
         cakes = new ArrayList<>();
         mMainAdapter = new MainAdapter(cakes, MainActivity.this);
         mRecycleView.setAdapter(mMainAdapter);

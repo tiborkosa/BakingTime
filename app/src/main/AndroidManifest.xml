@@ -13,6 +13,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <receiver android:name=".widgets.BakeTimeProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/bake_time_provider_info" />
+        </receiver>
+
+        <service android:name=".widgets.ListWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
+        <service android:name=".widgets.ListWidgetIngService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
         <activity android:name=".RecipeActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

@@ -12,6 +12,9 @@ import com.example.bakingtime.models.Ingredient;
 
 import java.util.List;
 
+import static com.example.bakingtime.utils.UtilMethods.capitalizeFirstLetter;
+import static com.example.bakingtime.utils.UtilMethods.removeZero;
+
 public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.ViewHolder> {
 
     private List<Ingredient> mIngredients;
@@ -60,20 +63,8 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
 
         private void bind(Ingredient ingredient){
             mIngName.setText(capitalizeFirstLetter(ingredient.getIngredient()));
-            mIngQuantity.setText( removeZero(String.valueOf(ingredient.getQuantity())) );
+            mIngQuantity.setText( removeZero(ingredient.getQuantity()) );
             mIngMeasure.setText(ingredient.getMeasure());
         }
-    }
-
-    private static String removeZero(String d){
-        int len = d.length();
-        if(d.charAt(len -1) == '0'){
-            return d.substring(0, len -2);
-        }
-        return d;
-    }
-
-    private static String capitalizeFirstLetter(String s){
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 }

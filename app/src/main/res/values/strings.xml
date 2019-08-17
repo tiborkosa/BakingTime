@@ -12,4 +12,9 @@
     <string name="menu_item_home">Home</string>
     <string name="menu_item_back">Back to list</string>
     <string name="no_image">No Image</string>
+    <string name="appwidget_text">No Recipes fond.</string>
+    <string name="add_widget">Add widget</string>
+    <string name="no_ingredients">No ingredients!</string>
+    <string name="widget_back_button">Back</string>
+    <string name="widget_forward_button">Open details</string>
 </resources>

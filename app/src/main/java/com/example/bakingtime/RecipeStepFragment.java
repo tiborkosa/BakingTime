@@ -1,7 +1,8 @@
 package com.example.bakingtime;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.bakingtime.models.Step;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -31,18 +33,22 @@ import com.google.android.exoplayer2.util.Util;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class RecipeStepFragment extends Fragment {
 
     private Step step;
     private OnNextStepClickedListener mCallback;
-    private SimpleExoPlayerView mPlayerView;
-    private SimpleExoPlayer mExoPlayer;
-    private Long currentPosition;
-    private Boolean isPlayerReady;
-    private TextView mDescription;
-    private Button mNextStep;
-    private ImageView mNoImage;
+    @BindView(R.id.exo_player) SimpleExoPlayerView mPlayerView;
+    private static SimpleExoPlayer mExoPlayer;
+    //private Long currentPosition;
+    //private Boolean isPlayerReady;
+    @Nullable @BindView(R.id.tv_step_detail) TextView mDescription;
+    @Nullable @BindView(R.id.btn_next_step) Button mNextStep;
+    @BindView(R.id.iv_player_no_image) ImageView mNoImage;
+
 
     private final static String TAG = RecipeStepFragment.class.getSimpleName();
     private final static String STEP = "step";
@@ -64,8 +70,11 @@ public class RecipeStepFragment extends Fragment {
         RecipeStepFragment fragment = new RecipeStepFragment();
         Bundle args = new Bundle();
         args.putParcelable(STEP, step);
-        //args.putLong(PLAYER_CURRENT_POS_KEY, Math.max(0, mExoPlayer.getCurrentPosition()));
-        //args.putBoolean(PLAYER_IS_READY_KEY, mExoPlayer.getPlayWhenReady());
+       /* if(mExoPlayer != null) {
+            args.putLong(PLAYER_CURRENT_POS_KEY, Math.max(0, mExoPlayer.getCurrentPosition()));
+            args.putBoolean(PLAYER_IS_READY_KEY, mExoPlayer.getPlayWhenReady());
+        }*/
+
         fragment.setArguments(args);
 
         return fragment;
@@ -91,12 +100,10 @@ public class RecipeStepFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_step_fragment, container,false);
+        ButterKnife.bind(this, rootView);
 
         isTablet = getResources().getBoolean(R.bool.isTablet);
-        mDescription = rootView.findViewById(R.id.tv_step_detail);
-        mPlayerView = rootView.findViewById(R.id.exo_player);
-        mNextStep = rootView.findViewById((R.id.btn_next_step));
-        mNoImage = rootView.findViewById(R.id.iv_player_no_image);
+
 
         if(rootView.findViewById(R.id.tv_step_detail) == null){
             Log.d(TAG, "it is portrait mode");
@@ -136,7 +143,7 @@ public class RecipeStepFragment extends Fragment {
         }
 
         if (step.getVideoURL() != null && !step.getVideoURL().isEmpty()) {
-            initializePlayer(step.getVideoURL(), this.getContext(), savedInstanceState);
+            initializePlayer(step.getVideoURL(), this.getContext());
         } else if(step.getThumbnailURL() != null && !step.getThumbnailURL().isEmpty()){
             hideVideoShowImage();
             Picasso
@@ -161,14 +168,23 @@ public class RecipeStepFragment extends Fragment {
         mNoImage.setVisibility(View.VISIBLE);
     }
 
-    private void resumePlaybackFromStateBundle(@Nullable Bundle inState) {
+    /*private void resumePlaybackFromStateBundle() {
         Log.d(TAG, "Resuming player.");
-        mExoPlayer.setPlayWhenReady(inState.getBoolean(PLAYER_IS_READY_KEY));
-        mExoPlayer.seekTo(inState.getLong(PLAYER_CURRENT_POS_KEY));
-    }
+        mExoPlayer.setPlayWhenReady(isPlayerReady);
+        mExoPlayer.seekTo(currentPosition);
+    }*/
 
-    private void initializePlayer(String urlString, Context context, Bundle inState) {
+    private void initializePlayer(String urlString, Context context) {
         if (step.getVideoURL() == null || step.getVideoURL().isEmpty()) return;
+
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
+        if(!isConnected) {
+            Toast.makeText(context, "Could not connect to the internet!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Uri mediaUri = Uri.parse(urlString);
         if (mExoPlayer == null) {
@@ -184,9 +200,7 @@ public class RecipeStepFragment extends Fragment {
             mExoPlayer.prepare(mediaSource);
             mExoPlayer.setPlayWhenReady(true);
         } else{
-            if (inState != null) {
-                resumePlaybackFromStateBundle(inState);
-            }
+            //resumePlaybackFromStateBundle();
         }
     }
 
