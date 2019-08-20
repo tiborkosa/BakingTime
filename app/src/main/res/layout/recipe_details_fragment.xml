@@ -13,6 +13,7 @@
         android:text="@string/recipe_ingredients_button"
         android:textSize="18sp"
         android:padding="16dp"
+        android:background="@color/button"
         android:layout_margin="8dp"/>
 
     <android.support.v7.widget.RecyclerView

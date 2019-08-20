@@ -14,7 +14,7 @@
         android:layout_height="80dp"
         android:alpha="0.4"
         android:contentDescription="@string/backdrop_text"
-        android:src="@color/colorPrimary"
+        android:src="@color/button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

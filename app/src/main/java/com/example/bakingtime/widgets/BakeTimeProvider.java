@@ -27,6 +27,12 @@ public class BakeTimeProvider extends AppWidgetProvider {
     public static final String INGREDIENTS = "ingredients";
     private static String currentAction = "recipes";
 
+    /**
+     *
+     * @param context
+     * @param appWidgetManager
+     * @param appWidgetId
+     */
     private static void getBakingTimeRecipesRemoteView(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         Log.d(TAG, "[getBakingTimeRecipesRemoteView]");
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_recipe_view);
@@ -48,6 +54,13 @@ public class BakeTimeProvider extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
+    /**
+     *
+     * @param context
+     * @param appWidgetManager
+     * @param appWidgetId
+     * @param cakeId
+     */
     private static void getBakingTimeIngredientsRemoteView(Context context, AppWidgetManager appWidgetManager, int appWidgetId, int cakeId) {
         Log.d(TAG, "[getBakingTimeIngredientsRemoteView]");
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_recipe_view);
@@ -67,6 +80,13 @@ public class BakeTimeProvider extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
+    /**
+     *
+     * @param context
+     * @param appWidgetManager
+     * @param appWidgetIds
+     * @param cakeId
+     */
     static void updateAppWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, int cakeId){
 
         for (int appWidgetId : appWidgetIds) {
@@ -77,6 +97,11 @@ public class BakeTimeProvider extends AppWidgetProvider {
         }
     }
 
+    /**
+     *
+     * @param context
+     * @param intent
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
@@ -95,36 +120,68 @@ public class BakeTimeProvider extends AppWidgetProvider {
         super.onReceive(context, intent);
     }
 
+    /**
+     *
+     * @param context
+     * @param appWidgetManager
+     * @param appWidgetIds
+     */
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         Log.d(TAG, "[onUpdate]");
         updateAppWidgets(context,appWidgetManager, appWidgetIds, 0);
     }
 
+    /**
+     *
+     * @param context
+     * @param appWidgetManager
+     * @param appWidgetId
+     * @param newOptions
+     */
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         Log.d(TAG, "[onAppWidgetOptionsChanged]");
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
     }
 
+    /**
+     *
+     * @param context
+     * @param appWidgetIds
+     */
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
         Log.d(TAG, "[onDeleted]");
         super.onDeleted(context, appWidgetIds);
     }
 
+    /**
+     *
+     * @param context
+     */
     @Override
     public void onEnabled(Context context) {
         Log.d(TAG, "[onEnabled]");
         super.onEnabled(context);
     }
 
+    /**
+     *
+     * @param context
+     */
     @Override
     public void onDisabled(Context context) {
         Log.d(TAG, "[onDisabled]");
         super.onDisabled(context);
     }
 
+    /**
+     *
+     * @param context
+     * @param oldWidgetIds
+     * @param newWidgetIds
+     */
     @Override
     public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) {
         Log.d(TAG, "[onRestored]");

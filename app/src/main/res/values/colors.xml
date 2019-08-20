@@ -5,4 +5,5 @@
     <color name="colorAccent">#D81B60</color>
     <color name="darker_gray">#353333</color>
     <color name="black">#000000</color>
+    <color name="button">#ADC7EC</color>
 </resources>

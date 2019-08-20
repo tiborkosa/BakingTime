@@ -15,7 +15,9 @@ import java.util.List;
 
 import static com.example.bakingtime.widgets.BakeTimeProvider.WIDGET_CAKE_ID;
 
-
+/**
+ * Cake list widget service class
+ */
 public class ListWidgetService extends RemoteViewsService {
 
     private final static String TAG = ListWidgetService.class.getSimpleName();
@@ -26,6 +28,9 @@ public class ListWidgetService extends RemoteViewsService {
     }
 }
 
+/**
+ * Widget factory class
+ */
 class WidgetGetViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private final static String TAG = WidgetGetViewFactory.class.getSimpleName();
@@ -35,15 +40,23 @@ class WidgetGetViewFactory implements RemoteViewsService.RemoteViewsFactory {
     AppDatabase db;
 
 
+    /**
+     *
+     * @param applicationContext
+     */
     public WidgetGetViewFactory(Context applicationContext) {
         mContext = applicationContext;
     }
 
+    /**
+     *
+     */
     @Override
-    public void onCreate() {
+    public void onCreate() { }
 
-    }
-
+    /**
+     *
+     */
     @Override
     public void onDataSetChanged() {
 
@@ -59,17 +72,29 @@ class WidgetGetViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     }
 
+    /**
+     *
+     */
     @Override
     public void onDestroy() {
         closeDb();
         cakes = null;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public int getCount() {
         return cakes == null ? 0 : cakes.size();
     }
 
+    /**
+     *
+     * @param position
+     * @return
+     */
     @Override
     public RemoteViews getViewAt(int position) {
         if (position == AdapterView.INVALID_POSITION ||
@@ -87,26 +112,46 @@ class WidgetGetViewFactory implements RemoteViewsService.RemoteViewsFactory {
         return rv;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public RemoteViews getLoadingView() {
         return null;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public int getViewTypeCount() {
         return 1;
     }
 
+    /**
+     *
+     * @param position
+     * @return
+     */
     @Override
     public long getItemId(int position) {
         return cakes.size() < position ? 0 : position;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean hasStableIds() {
         return true;
     }
 
+    /**
+     *
+     */
     private void closeDb(){
         if( db != null) db.close();
         db = null;

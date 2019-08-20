@@ -17,7 +17,9 @@ import java.util.List;
 import static com.example.bakingtime.widgets.BakeTimeProvider.WIDGET_CAKE_ID;
 import static com.example.bakingtime.utils.UtilMethods.removeZero;
 
-
+/**
+ * Widget service class
+ */
 public class ListWidgetIngService extends RemoteViewsService {
 
     private final static String TAG = ListWidgetService.class.getSimpleName();
@@ -30,6 +32,9 @@ public class ListWidgetIngService extends RemoteViewsService {
     }
 }
 
+/**
+ * Class to display the ingredients
+ */
 class WidgetGetIngViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private final static String TAG = WidgetGetIngViewFactory.class.getSimpleName();
@@ -39,16 +44,22 @@ class WidgetGetIngViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     AppDatabase db;
 
+    /**
+     *
+     * @param applicationContext
+     * @param cakeId
+     */
     public WidgetGetIngViewFactory(Context applicationContext, int cakeId) {
         mContext = applicationContext;
         this.mCakeId = cakeId;
     }
 
     @Override
-    public void onCreate() {
+    public void onCreate() { }
 
-    }
-
+    /**
+     *
+     */
     @Override
     public void onDataSetChanged() {
         if (ingredients != null) {
@@ -64,17 +75,29 @@ class WidgetGetIngViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     }
 
+    /**
+     *
+     */
     @Override
     public void onDestroy() {
         closeDb();
         ingredients = null;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public int getCount() {
         return ingredients == null ? 0 : ingredients.size();
     }
 
+    /**
+     *
+     * @param position
+     * @return
+     */
     @Override
     public RemoteViews getViewAt(int position) {
         if (position == AdapterView.INVALID_POSITION ||
@@ -93,26 +116,46 @@ class WidgetGetIngViewFactory implements RemoteViewsService.RemoteViewsFactory {
         return rv;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public RemoteViews getLoadingView() {
         return null;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public int getViewTypeCount() {
         return 1;
     }
 
+    /**
+     *
+     * @param position
+     * @return
+     */
     @Override
     public long getItemId(int position) {
         return ingredients.size() < position ? 0 : position;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean hasStableIds() {
         return true;
     }
 
+    /**
+     *
+     */
     private void closeDb(){
         if( db != null) db.close();
         db = null;

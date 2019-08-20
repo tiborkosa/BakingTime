@@ -29,8 +29,14 @@ public class RecipeIngredientsFragment extends Fragment {
     private IngredientsAdapter adapter;
     private List<Ingredient> ingredients;
 
+    // Required empty public constructor
     public RecipeIngredientsFragment() {}
 
+    /**
+     * Setting up the fragment instance
+     * @param ingredients that will be added to the state
+     * @return fragment
+     */
     public static RecipeIngredientsFragment newInstance(List<Ingredient> ingredients){
         Log.d(TAG, "New instance of " + TAG + " created.");
 
@@ -42,6 +48,10 @@ public class RecipeIngredientsFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Create method
+     * @param savedInstance of the fragment
+     */
     @Override
     public void onCreate(Bundle savedInstance){
         super.onCreate(savedInstance);
@@ -52,6 +62,13 @@ public class RecipeIngredientsFragment extends Fragment {
         }
     }
 
+    /**
+     * Creating the view and setting up the fields
+     * @param inflater layout inflater
+     * @param container container we are loading the fragment into
+     * @param savedInstanceState saved data
+     * @return view
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

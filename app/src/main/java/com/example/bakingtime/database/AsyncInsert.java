@@ -1,6 +1,5 @@
 package com.example.bakingtime.database;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -10,8 +9,15 @@ import com.example.bakingtime.models.Step;
 
 import java.util.List;
 
+/**
+ * Helper class to save data to the DB asynchronously
+ */
 public class AsyncInsert {
 
+    /**
+     * Saving bulk ingredients data
+     * @param ingredients to be saved
+     */
     public void saveIngredients(final List<Ingredient> ingredients){
 
         class SaveBulkIngredients extends AsyncTask<Void, Void, Void>{
@@ -33,6 +39,10 @@ public class AsyncInsert {
         t.execute();
     }
 
+    /**
+     * Saving bulk step data
+     * @param steps to be saved
+     */
     public void saveSteps(final List<Step> steps){
 
         class SaveBulkSteps extends AsyncTask<Void, Void, Void>{
@@ -54,6 +64,10 @@ public class AsyncInsert {
         t.execute();
     }
 
+    /**
+     * Save bulk cake recipes
+     * @param cakes to be saved
+     */
     public void saveCakes(final List<Cake> cakes){
 
         class SaveBulkCakes extends AsyncTask<Void, Void, Void>{

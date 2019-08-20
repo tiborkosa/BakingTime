@@ -4,17 +4,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.bakingtime.IdlingResource.SimpleIdlingResource;
 import com.example.bakingtime.adapters.MainAdapter;
 import com.example.bakingtime.database.AppDatabase;
 import com.example.bakingtime.database.AsyncInsert;
@@ -36,13 +43,35 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements MainAdapter.ListItemClickLister{
 
     private final static String TAG = MainActivity.class.getSimpleName();
-
     private final static String URL ="https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
 
+    // for testing the UI
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
     @BindView(R.id.rv_main) RecyclerView mRecycleView;
+    @BindView(R.id.tv_error_main) TextView mErrorMessage;
     private MainAdapter mMainAdapter;
     private List<Cake> cakes;
 
+
+    /**
+     * setting up the idling resource for testing the UI
+     * @return idling resource instance
+     */
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
+
+    /**
+     * Create the activity
+     * @param savedInstanceState saved data
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,11 +83,18 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
         mRecycleView.setAdapter(mMainAdapter);
         mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, getColumns()));
 
+        /**
+         * Starting new thread that either loads the data from the web or the db
+         */
         Thread thread = new Thread(() -> {
             AppDatabase database = AppDatabase.getInstance();
             cakes = database.cakeDao().getAll();
             ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+            if (mIdlingResource != null) {
+                mIdlingResource.setIdleState(false);
+            }
 
             if(activeNetwork != null && cakes.size() > 0){
                 Log.d(TAG, "Getting data from the DB.");
@@ -66,6 +102,10 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
                     mMainAdapter = new MainAdapter(cakes, MainActivity.this);
                     mRecycleView.setAdapter(mMainAdapter);
                     mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, getColumns()));
+
+                    if (mIdlingResource != null) {
+                        mIdlingResource.setIdleState(true);
+                    }
                 });
             } else {
                 Log.d(TAG, "Getting data from the web.");
@@ -73,28 +113,40 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
             }
         });
         thread.start();
+
+        getIdlingResource();
     }
 
+    /**
+     * Getting the grid columns depending of the device size
+     * @return
+     */
     private int getColumns(){
         if(getResources().getBoolean(R.bool.isTablet)) return 2;
         return 1;
     }
+
+    /**
+     * Loading data from the web, process it and update UI
+     */
     private void loadDataFromWebAndSaveItInDB() {
         RequestQueue queue = Volley.newRequestQueue(this);
-
+        mErrorMessage.setVisibility(View.INVISIBLE);
         // Request a string response from the provided URL.
         JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, URL, null,
                 response -> {
-
                     processAndSaveData(response);
 
                     runOnUiThread(() -> {
                         mMainAdapter = new MainAdapter(cakes, MainActivity.this);
                         mRecycleView.setAdapter(mMainAdapter);
                         mRecycleView.setLayoutManager(new GridLayoutManager(MainActivity.this, getColumns()));
+                        if (mIdlingResource != null) {
+                            mIdlingResource.setIdleState(true);
+                        }
                     });
                 }, error -> {
-                    //textView.setText("That didn't work!");
+                    mErrorMessage.setVisibility(View.VISIBLE);
                     Log.d(TAG, error.toString());
                 });
 
@@ -102,6 +154,10 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
         queue.add(jsonObjectRequest);
     }
 
+    /**
+     * Processing the loaded data from the web and save it in the DB
+     * @param response from the web
+     */
     private void processAndSaveData(JSONArray response) {
         cakes = new ArrayList<>();
         List<Ingredient> ingredients = new ArrayList<>();
@@ -148,6 +204,10 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
         asyncInsertSteps.saveSteps(steps);
     }
 
+    /**
+     * Implemented method from the @MainAdapter
+     * @param clickedItemIndex opens the RecipeActivity of the selected Cake
+     */
     @Override
     public void onListItemClick(int clickedItemIndex) {
         Intent intent = new Intent(MainActivity.this, RecipeActivity.class);
@@ -156,6 +216,11 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.ListI
         startActivity(intent);
     }
 
+    /**
+     * Creating the menu for the sake of having one
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);

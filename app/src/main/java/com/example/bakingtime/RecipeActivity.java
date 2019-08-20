@@ -34,12 +34,12 @@ public class RecipeActivity extends AppCompatActivity implements
     private AppDatabase appDatabase = AppDatabase.getInstance();
     private FragmentManager fragmentManager;
     private int id;
-    private int currentStep = 0;
+    private int currentStep = -1;
     private List<Step> steps;
     private List<Ingredient> ingredients;
 
     private Boolean isTwoPane;
-    private static String currentFragment = DETAIL_FRAGMENT_TAG;
+    private static String currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +53,7 @@ public class RecipeActivity extends AppCompatActivity implements
 
         setContentView(R.layout.activity_recipe);
         Log.d(TAG, "[RecipeActivity] onCreate called!");
+        Log.d(TAG, "[RecipeActivity] isTwoPane: " + isTwoPane);
 
         Intent intent = getIntent();
         id = Integer.valueOf(intent.getStringExtra("cakeId") );
@@ -66,6 +67,7 @@ public class RecipeActivity extends AppCompatActivity implements
          * If it is two pane mode start the ingredients as well
          */
         if(savedInstanceState == null){
+            currentFragment = DETAIL_FRAGMENT_TAG;
             loadStepsAndStartDetailFragment();
             if(isTwoPane){
                 loadAndStartIngredients(true);
@@ -82,27 +84,38 @@ public class RecipeActivity extends AppCompatActivity implements
             currentStep = savedInstanceState.getInt("currentStep");
             if(isTwoPane){
                 startDetailsFragment();
-                if(currentFragment.equals(STEP_FRAGMENT_TAG)){
-                    startStepFragment(currentStep);
-                }else{
+                if( currentStep == -1 || currentFragment.equals(INGREDIENT_FRAGMENT_TAG) ) {
                     startIngredientFragment(true);
+                } else {
+                    startStepFragment(currentStep);
                 }
             } else {
                 if(currentFragment.equals(DETAIL_FRAGMENT_TAG)){
                     startDetailsFragment();
                 } else if(currentFragment.equals(STEP_FRAGMENT_TAG)){
-                    RecipeStepFragment rf = (RecipeStepFragment) fragmentManager.findFragmentByTag(STEP_FRAGMENT_TAG);
-                    //TODO: need to check if this is visible?
-                    replaceFragmentWithoutBackstack(R.id.recipe_main, STEP_FRAGMENT_TAG, rf);
+                    Fragment fragment = fragmentManager.findFragmentByTag(STEP_FRAGMENT_TAG);
+                    if(fragment == null) {
+                        startStepFragment(0);
+                    } else {
+                        replaceFragmentWithoutBackstack(R.id.recipe_main, STEP_FRAGMENT_TAG, fragment);
+                    }
                 } else{
-                    RecipeIngredientsFragment ingf = (RecipeIngredientsFragment) fragmentManager.findFragmentByTag(INGREDIENT_FRAGMENT_TAG);
-                    //TODO: need to check if this is visible?
-                    replaceFragmentWithoutBackstack(R.id.recipe_main, INGREDIENT_FRAGMENT_TAG, ingf);
+                    Fragment fragment = fragmentManager.findFragmentByTag(INGREDIENT_FRAGMENT_TAG);
+                    if(fragment == null){
+                     startIngredientFragment(true);
+                    } else {
+                        replaceFragmentWithoutBackstack(R.id.recipe_main, INGREDIENT_FRAGMENT_TAG, fragment);
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Creating the menu
+     * @param menu object
+     * @return true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -112,6 +125,11 @@ public class RecipeActivity extends AppCompatActivity implements
         return true;
     }
 
+    /**
+     * The menu items selected
+     * @param item that was selected
+     * @return super or true
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -132,27 +150,22 @@ public class RecipeActivity extends AppCompatActivity implements
         }
     }
 
+    // To see the logs if orientation changes
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
         if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
             Log.d(TAG,"Landscape mode");
         }
-
         if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             Log.d(TAG,"Portrait mode mode");
         }
     }
 
-    private void startDetailsFragment(){
-        RecipeDetailsFragment recipeDetailsFragment
-                = RecipeDetailsFragment
-                .newInstance(steps,id);
-        currentFragment = DETAIL_FRAGMENT_TAG;
-        addFragment(R.id.recipe_main,DETAIL_FRAGMENT_TAG, recipeDetailsFragment);
-    }
-
+    /**
+     * Saving instance state
+     * @param outState of the saved data
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -163,35 +176,30 @@ public class RecipeActivity extends AppCompatActivity implements
         outState.putInt("currentStep",currentStep);
     }
 
+    /**
+     * Implemented interface of the @RecipeDetailsFragment
+     * @param clickedItemIndex id the step id that we want to load
+     */
     @Override
     public void onListItemClick(int clickedItemIndex) {
-        currentStep = clickedItemIndex;
         startStepFragment(clickedItemIndex);
         Log.d(TAG, "steps clicked");
     }
 
+    /**
+     * Implemented interface @RecipeIngredientFragment
+     * This will lunch the ingredients list fragment
+     */
     @Override
     public void onIngredientClickedListener() {
         startIngredientFragment(true);
     }
 
-    private void startIngredientFragment(boolean isReplace){
-        RecipeIngredientsFragment ingredientsFragment =
-                RecipeIngredientsFragment
-                        .newInstance(ingredients);
-
-        currentFragment = INGREDIENT_FRAGMENT_TAG;
-        if(isReplace) {
-            if(isTwoPane)
-                replaceFragmentWithoutBackstack(R.id.recipe_second_frame,INGREDIENT_FRAGMENT_TAG, ingredientsFragment);
-            else
-                replaceFragmentWithBackstack(INGREDIENT_FRAGMENT_TAG, ingredientsFragment);
-        }
-
-        else
-            addFragment(R.id.recipe_second_frame, INGREDIENT_FRAGMENT_TAG, ingredientsFragment);
-    }
-
+    /**
+     * Implemented interface from @RecipeStepFragment
+     * It will lunch an other fragment that shows the next step of the recipe list
+     * @param stepId is the recipe step id
+     */
     @Override
     public void onNextStepClickedListener(int stepId) {
 
@@ -205,28 +213,10 @@ public class RecipeActivity extends AppCompatActivity implements
         startStepFragment(stepId);
     }
 
-    private void startStepFragment(int stepId){
-        Step step;
-        // taking care of index out of bounce exception
-        try{
-            step = steps.get(stepId);
-        } catch (IndexOutOfBoundsException e){
-            Log.e(TAG, "startStepFragment index out of bounce happened.");
-            step = steps.get(0);
-        }
-        RecipeStepFragment stepFragment =
-                RecipeStepFragment
-                        .newInstance(step);
-
-        currentFragment = STEP_FRAGMENT_TAG;
-        if(isTwoPane) {
-            replaceFragmentWithoutBackstack(R.id.recipe_second_frame, STEP_FRAGMENT_TAG,stepFragment);
-        } else {
-            replaceFragmentWithBackstack(STEP_FRAGMENT_TAG, stepFragment);
-        }
-    }
-
-    // load data methods
+    // DETAIL FRAGMENT
+    /**
+     * loads the step data and starts the details fragment
+     */
     private void loadStepsAndStartDetailFragment(){
         Log.d(TAG, "Loading steps from db.");
 
@@ -237,6 +227,71 @@ public class RecipeActivity extends AppCompatActivity implements
         thread.start();
     }
 
+    /**
+     * Starting the details fragment
+     */
+    private void startDetailsFragment(){
+        RecipeDetailsFragment recipeDetailsFragment
+                = RecipeDetailsFragment
+                .newInstance(steps, id);
+
+        if(!isTwoPane) currentFragment = DETAIL_FRAGMENT_TAG;
+
+        Fragment fragment = fragmentManager.findFragmentByTag(DETAIL_FRAGMENT_TAG);
+        if(fragment == null)
+            addFragment(R.id.recipe_main, DETAIL_FRAGMENT_TAG, recipeDetailsFragment);
+    }
+
+    // STEP FRAGMENT
+
+    /**
+     * Starting the step fragment
+     * @param stepId is the id of the step that we are loading
+     */
+    private void startStepFragment(int stepId){
+        if(stepId <= 0 || stepId > steps.size() -1){
+            stepId = 0;
+        }
+        currentStep = stepId;
+        RecipeStepFragment stepFragment =
+                RecipeStepFragment
+                        .newInstance(steps.get(stepId));
+
+        currentFragment = STEP_FRAGMENT_TAG;
+
+        if(isTwoPane) {
+            replaceFragmentWithoutBackstack(R.id.recipe_second_frame, STEP_FRAGMENT_TAG,stepFragment);
+        } else {
+            replaceFragmentWithBackstack(STEP_FRAGMENT_TAG, stepFragment);
+        }
+    }
+
+    // INGREDIENT FRAGMENT
+
+    /**
+     * Starting the ingredient fragment
+     * @param isReplace is a boolean to see if we need to lunch it on start
+     */
+    private void startIngredientFragment(boolean isReplace){
+        RecipeIngredientsFragment ingredientsFragment =
+                RecipeIngredientsFragment
+                        .newInstance(ingredients);
+
+        currentFragment = INGREDIENT_FRAGMENT_TAG;
+        if(isReplace) {
+            if(isTwoPane)
+                replaceFragmentWithoutBackstack(R.id.recipe_second_frame,INGREDIENT_FRAGMENT_TAG, ingredientsFragment);
+            else
+                replaceFragmentWithBackstack(INGREDIENT_FRAGMENT_TAG, ingredientsFragment);
+        } else
+            addFragment(R.id.recipe_second_frame, INGREDIENT_FRAGMENT_TAG, ingredientsFragment);
+    }
+
+    /**
+     * loads the ingredients and starts ingredients fragment
+     * @param start is used to automatically start the fragment or not depending on the screen size
+     *              if two pane mode it will lunch otherwise we start it on button click
+     */
     private void loadAndStartIngredients(final boolean start){
         Log.d(TAG, "Loading ingredients from db.");
         Thread thread = new Thread( () -> {
@@ -249,15 +304,30 @@ public class RecipeActivity extends AppCompatActivity implements
 
     //Fragment helper methods
 
+    /**
+     * Adding the fragment to the container
+     * @param container we want to load the fragment
+     * @param name name of the fragment
+     * @param fragment the fragment we are adding
+     */
     private void addFragment(int container, String name, Fragment fragment){
+        Log.d(TAG, name + " fragment was added");
         fragmentManager
                 .beginTransaction()
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .add(container ,fragment,name)
+                .add(container ,fragment, name)
                 .commit();
     }
 
+    /**
+     * Adding the fragment to the container WITHOUT adding it to the back stack
+     * We are checking if fragments already added due to multi screen load error
+     * @param container we want to load the fragment
+     * @param name name of the fragment
+     * @param fragment the fragment we are adding
+     */
     private void replaceFragmentWithoutBackstack(int container, String name, Fragment fragment){
+        Log.d(TAG, name + " fragment was replaced without backstack");
         fragmentManager
                 .beginTransaction()
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -265,13 +335,20 @@ public class RecipeActivity extends AppCompatActivity implements
                 .commit();
     }
 
+    /**
+     * Replacing the fragment in the container and adding it to the back stack
+     * We are checking if there is any fragment already added due to multi screen load error
+     * @param name name of the fragment
+     * @param fragment the fragment we are adding
+     */
     private void replaceFragmentWithBackstack(String name, Fragment fragment){
+        Log.d(TAG, name + " fragment was replaced with backstack");
         fragmentManager
                 .beginTransaction()
                 .addToBackStack(name)
-                .setReorderingAllowed(true)
+                //.setReorderingAllowed(true)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .replace(R.id.recipe_main,fragment, name)
+                .replace(R.id.recipe_main, fragment, name)
                 .commit();
     }
 }

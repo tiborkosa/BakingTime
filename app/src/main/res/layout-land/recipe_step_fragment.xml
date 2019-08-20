@@ -9,6 +9,7 @@
         android:id="@+id/exo_player"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
     <ImageView
         android:id="@+id/iv_player_no_image"
         android:layout_width="match_parent"

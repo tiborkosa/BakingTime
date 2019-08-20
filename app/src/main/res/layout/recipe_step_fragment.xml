@@ -31,6 +31,7 @@
         android:id="@+id/btn_next_step"
         android:text="@string/next_step"
         android:layout_margin="16dp"
+        android:background="@color/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

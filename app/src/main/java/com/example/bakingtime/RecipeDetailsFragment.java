@@ -14,7 +14,6 @@ import android.widget.Button;
 
 import com.example.bakingtime.adapters.RecipeAdapter;
 import com.example.bakingtime.models.Step;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +33,15 @@ public class RecipeDetailsFragment extends Fragment {
     private OnIngredientClickedListener mCallback;
     RecipeAdapter.ListItemClickListener mNextStepCallback;
 
+    // Required empty public constructor
     public RecipeDetailsFragment() {}
 
+    /**
+     * Setting up the fragment instance
+     * @param steps of the cake
+     * @param id of the cake
+     * @return fragment
+     */
     public static RecipeDetailsFragment newInstance(List<Step> steps, int id) {
         RecipeDetailsFragment fragment = new RecipeDetailsFragment();
         Bundle args = new Bundle();
@@ -46,6 +52,10 @@ public class RecipeDetailsFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Create method
+     * @param savedInstanceState of the fragment
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +64,11 @@ public class RecipeDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Attach method that will check if interface is implemented
+     * @param context
+     * Throws runtime exception if interface is not implemented
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -71,6 +86,13 @@ public class RecipeDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Creating the view and setting up the fields
+     * @param inflater layout inflater
+     * @param container container we are loading the fragment into
+     * @param savedInstanceState saved data
+     * @return view
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -85,12 +107,18 @@ public class RecipeDetailsFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Cleaning up the callback
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mCallback = null;
     }
 
+    /**
+     * Interface the will be implemented in the @RecipeActivity
+     */
     public interface OnIngredientClickedListener {
         void onIngredientClickedListener();
     }

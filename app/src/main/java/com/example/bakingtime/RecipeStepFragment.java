@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.squareup.picasso.Callback;
@@ -41,24 +42,22 @@ public class RecipeStepFragment extends Fragment {
 
     private Step step;
     private OnNextStepClickedListener mCallback;
-    @BindView(R.id.exo_player) SimpleExoPlayerView mPlayerView;
+    private static  SimpleExoPlayerView mPlayerView;
     private static SimpleExoPlayer mExoPlayer;
-    //private Long currentPosition;
-    //private Boolean isPlayerReady;
     @Nullable @BindView(R.id.tv_step_detail) TextView mDescription;
     @Nullable @BindView(R.id.btn_next_step) Button mNextStep;
     @BindView(R.id.iv_player_no_image) ImageView mNoImage;
 
-
     private final static String TAG = RecipeStepFragment.class.getSimpleName();
     private final static String STEP = "step";
-    private final static String PLAYER_CURRENT_POS_KEY = "player_pos";
-    private final static String PLAYER_IS_READY_KEY = "player_ready";
 
     private Boolean isPortrait = false;
     private Boolean isTablet;
 
-
+    /**
+     * Interface that will be implemented in @RecipeActivity
+     * It will lunch the next fragment
+     */
     public interface OnNextStepClickedListener{
         void onNextStepClickedListener(int stepId);
     }
@@ -66,20 +65,24 @@ public class RecipeStepFragment extends Fragment {
     // Required empty public constructor
     public RecipeStepFragment() {}
 
+    /**
+     * Setting up the fragment instance
+     * @param step that will be added to the state
+     * @return fragment
+     */
     public static RecipeStepFragment newInstance(Step step){
         RecipeStepFragment fragment = new RecipeStepFragment();
         Bundle args = new Bundle();
         args.putParcelable(STEP, step);
-       /* if(mExoPlayer != null) {
-            args.putLong(PLAYER_CURRENT_POS_KEY, Math.max(0, mExoPlayer.getCurrentPosition()));
-            args.putBoolean(PLAYER_IS_READY_KEY, mExoPlayer.getPlayWhenReady());
-        }*/
 
         fragment.setArguments(args);
-
         return fragment;
     }
 
+    /**
+     * Create method
+     * @param savedInstanceState of the fragment
+     */
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -87,13 +90,18 @@ public class RecipeStepFragment extends Fragment {
         if(getArguments() != null){
             step = getArguments().getParcelable(STEP);
             Log.d(TAG, step.toString());
-            //currentPosition = getArguments().getLong(PLAYER_CURRENT_POS_KEY);
-            //isPlayerReady = getArguments().getBoolean(PLAYER_IS_READY_KEY);
         } else {
             Log.d(TAG, "onCreate RecipeStepFragment. Argument is null");
         }
     }
 
+    /**
+     * Creating the view and setting up the fields
+     * @param inflater layout inflater
+     * @param container container we are loading the fragment into
+     * @param savedInstanceState saved data
+     * @return view
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -102,6 +110,7 @@ public class RecipeStepFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.recipe_step_fragment, container,false);
         ButterKnife.bind(this, rootView);
 
+        mPlayerView = rootView.findViewById(R.id.exo_player);
         isTablet = getResources().getBoolean(R.bool.isTablet);
 
 
@@ -119,6 +128,11 @@ public class RecipeStepFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Attach method that will check if interface is implemented
+     * @param context
+     * Throws runtime exception if interface is not implemented
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -130,6 +144,12 @@ public class RecipeStepFragment extends Fragment {
         }
     }
 
+    /**
+     * When activity is created we set up the fields
+     * Checking if video can be started, otherwise load image
+     *      (default image src is set if image is not loaded)
+     * @param savedInstanceState
+     */
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -144,7 +164,9 @@ public class RecipeStepFragment extends Fragment {
 
         if (step.getVideoURL() != null && !step.getVideoURL().isEmpty()) {
             initializePlayer(step.getVideoURL(), this.getContext());
+            Log.d(TAG,"Starting video");
         } else if(step.getThumbnailURL() != null && !step.getThumbnailURL().isEmpty()){
+            Log.d(TAG,"Loading image thumbnail.");
             hideVideoShowImage();
             Picasso
                 .get()
@@ -155,25 +177,26 @@ public class RecipeStepFragment extends Fragment {
                     @Override
                     public void onError(Exception e) {
                         e.printStackTrace();
-                        Log.e(TAG,"error ");
+                        Log.e(TAG,"error loading image thumbnail.");
                     }
                 });
         }else {
+            Log.e(TAG,"doing nothing here.");
             hideVideoShowImage();
         }
     }
 
+    // Hide image if video is loaded
     private void hideVideoShowImage() {
         mPlayerView.setVisibility(View.GONE);
         mNoImage.setVisibility(View.VISIBLE);
     }
 
-    /*private void resumePlaybackFromStateBundle() {
-        Log.d(TAG, "Resuming player.");
-        mExoPlayer.setPlayWhenReady(isPlayerReady);
-        mExoPlayer.seekTo(currentPosition);
-    }*/
-
+    /**
+     * Initializing video
+     * @param urlString where we load the video
+     * @param context
+     */
     private void initializePlayer(String urlString, Context context) {
         if (step.getVideoURL() == null || step.getVideoURL().isEmpty()) return;
 
@@ -188,6 +211,7 @@ public class RecipeStepFragment extends Fragment {
 
         Uri mediaUri = Uri.parse(urlString);
         if (mExoPlayer == null) {
+            Log.d(TAG,"creating exopleyer instance");
             // Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
@@ -200,10 +224,13 @@ public class RecipeStepFragment extends Fragment {
             mExoPlayer.prepare(mediaSource);
             mExoPlayer.setPlayWhenReady(true);
         } else{
-            //resumePlaybackFromStateBundle();
+            Log.d(TAG, "Not doing anything.");
         }
     }
 
+    /**
+     * Cleaning up exoplayer
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -217,6 +244,7 @@ public class RecipeStepFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        Log.d(TAG, "[onDetach]");
         mCallback = null;
     }
 

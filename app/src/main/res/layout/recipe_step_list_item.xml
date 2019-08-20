@@ -7,4 +7,5 @@
     android:textSize="18sp"
     android:text="@string/recipe_ingredients_button"
     android:padding="16dp"
+    android:background="@color/button"
     android:layout_margin="8dp"/>

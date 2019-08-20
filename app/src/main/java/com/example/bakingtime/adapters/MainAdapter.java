@@ -63,7 +63,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder>  {
         return mFoodNumberItems;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private ConstraintLayout constraintLayout;
         private TextView cakeName;
@@ -102,22 +102,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder>  {
                         Log.d("TAG", "Prepare Load");
                     }
                 });
-               /* Picasso
-                        .get()
-                        .load(cake.getImage())
-                        .placeholder(R.drawable.img_not_available)
-                        .into(imageView, new Callback() {
-                            @Override
-                            public void onSuccess() {
-
-                            }
-
-                            @Override
-                            public void onError(Exception e) {
-                                e.printStackTrace();
-                                Log.e(TAG,"error ");
-                            }
-                        });*/
             }
         }
 
